@@ -1,28 +1,38 @@
 package ma.bigdata;
+
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+
 public class BikeRentalAnalysis {
+
     public static void main(String[] args) {
         // Créer une SparkSession
         SparkSession spark = SparkSession.builder()
                 .appName("Bike Sharing Analysis")
-                .master("local[*]")  // Exécution locale
+                .master("spark://spark-master-bike:7077")  // Connexion au cluster Spark
+                .config("spark.submit.deployMode", "client")
                 .getOrCreate();
+
         // Définir le niveau de log à WARN pour réduire les messages
         spark.sparkContext().setLogLevel("WARN");
+
         System.out.println("=== SPARK SQL - BIKE SHARING ANALYSIS ===\n");
+
         // ====================================
         // 1. DATA LOADING & EXPLORATION
         // ====================================
         System.out.println("1. DATA LOADING & EXPLORATION");
         System.out.println("----------------------------------------");
-        // 1.1 Charger le CSV
+
+        // 1.1 Charger le CSV depuis HDFS
         Dataset<Row> bikeDF = spark.read()
                 .option("header", "true")
                 .option("inferSchema", "true")
-                .csv("data/bike_sharing.csv");
+                .csv("hdfs://namenode:8020/input-data/bike_sharing.csv");
+
         System.out.println("✓ Dataset chargé avec succès\n");
+
         // 1.2 Afficher le schéma
         System.out.println("1.2 Schéma du DataFrame:");
         bikeDF.printSchema();
